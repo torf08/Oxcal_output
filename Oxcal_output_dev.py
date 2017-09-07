@@ -34,9 +34,6 @@ else:
     x = (json_filename.name)
     json_name_split = x.split(".")
     
-    print(json_name_split)
-    
-    
     if 'json' in json_name_split:
         print ("Opening read file")
         Oxcal_Data=json.load(json_filename)
