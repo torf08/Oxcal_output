@@ -33,8 +33,7 @@ if json_filename == None:
 else:
     x = (json_filename.name)
     json_name_split = x.split(".")
-    print(json_name_split)
-    """
+    
     if json_name_split[1] == "json":
         print ("Opening read file")
         Oxcal_Data=json.load(json_filename)
@@ -42,7 +41,7 @@ else:
     else:
         print ("The opened file must be a .json file extension!")
         quit()
-   """
+  
 if excel_filename == None:
     print ("No file selected for save file. Should be a .xlsx")
     quit()
