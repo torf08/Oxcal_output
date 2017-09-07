@@ -34,7 +34,10 @@ else:
     x = (json_filename.name)
     json_name_split = x.split(".")
     
-    if json_name_split[1] == "json":
+    print(json_name_split)
+    
+    
+    if 'json' in json_name_split:
         print ("Opening read file")
         Oxcal_Data=json.load(json_filename)
         json_filename.close()
@@ -47,10 +50,10 @@ if excel_filename == None:
     quit()
 else:
     excel_name_split = (excel_filename.split("."))
-    if excel_name_split[1] == "xlsx" or excel_name_split[1] == "xls":
+    if 'xlsx' in excel_name_split or 'xls' in excel_name_split:
         print("Opening save file")
     else:
-        print ("The save file must be a .xlsx file etension!")
+        print ("The save file must be a .xlsx or .xls file etension!")
         quit()
           
 #Create Woorkbooks for Oxcal_Data using xlsxwriter
