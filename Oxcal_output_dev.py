@@ -173,7 +173,7 @@ for dict in Oxcal_Data[1:]:
             else:
                 step_in_3d = abs(step_in_3d)
                 
-                BC_AD_Date = ('BC ' + str(int(step_ind_3d)) + '-AD ', str(int(step_in_3e)))
+                BC_AD_Date = ('BC ' + str(int(step_in_3d)) + '-AD ', str(int(step_in_3e)))
                 worksheet.write(sheet1_row2, sheet1_col1+5, BC_AD_Date, center)
             
            
