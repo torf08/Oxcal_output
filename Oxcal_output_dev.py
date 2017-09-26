@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This script is designed to use json strings generated from the javascripts produced by the Oxcal 14C calibration plugin for Firefox. 
+This script is designed to use json strings generated from the javascript files produced by the Oxcal 14C calibration plugin for Firefox. 
 
 It is intended to be run using python3 with tcl-tk built-in. See -- https://stackoverflow.com/questions/36760839/why-my-python-installed-via-home-brew-not-include-tkinter
 for information on how to install python3 with tcl-tk on Mac and Linux machines.
@@ -23,7 +23,7 @@ import xlsxwriter
 root = Tk()
 root.withdraw()
 
-#ask for and equal .JSON file to variable json_filename and ask for and save excel file name and location
+#ask for and equal .JSON file to variable json_filename & ask for and save excel file name and location
 json_filename=filedialog.askopenfile(initialdir ="~/", title = "Select .json file", filetypes = (("json files", "*.json"),("all files","*.*")))
 
 excel_filename = filedialog.asksaveasfilename(initialdir ="~/", title = "Save to .xlsx file", filetypes = (("Excel Workbook", "*.xlsx"),("Excel Workbook", "*.xls"),("all files","*.*")))
