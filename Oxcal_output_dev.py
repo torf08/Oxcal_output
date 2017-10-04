@@ -45,7 +45,7 @@ else:
         quit()
   
 if excel_filename == None:
-    print ("No file selected for save file. Should be a .xlsx")
+    print ("No file selected for save file. Should be a .xlsx or .xls")
     quit()
 else:
     excel_name_split = (excel_filename.split("."))
@@ -217,7 +217,7 @@ for dict in Oxcal_Data[1:]:
     #write dates of probability density to worksheet2 and increment up the start dates by resolution (5 years)
     for count in row_count:
         worksheet2.write(sheet2_row1, sheet2_col1-1, start_date)
-        start_date += 5
+        start_date += list_res
         sheet2_row1 += 1
     
     #reset worksheet2 columns, rows, and row_count to necessary values for restart of loop     
