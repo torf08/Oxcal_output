@@ -148,7 +148,7 @@ def Ranges(range, indpos1, indpos2, col1, col2, row):
             
         return
 
-#Determine 
+#Determine number of rows that each samples probability ranges used. Correct the rowshift so that a 1 row spacing is kept between each sample.
 def Row_Shift (x, y):
     
     global rowshift1
@@ -200,7 +200,7 @@ for dict in Oxcal_Data[0:]:
     list_start = list_liklihood['start']
     list_res = list_liklihood['resolution']
     
-    #Modeled Range, Median, Sigma, Probability, 
+    #Modeled Range, Median, Sigma, Probability, Model Agreement, ProbNorm, and Convergence
     list_posterior = IndvData['posterior']
     modeled_range = list_posterior['range']
     modeled_median = list_posterior['median']
@@ -216,11 +216,11 @@ for dict in Oxcal_Data[0:]:
     Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_convergence, format) #need another digit
     Date_ranges.write(sheet1_row1, sheet1_col1+19, modeled_probNorm, format) #need 7 digits
     
-    #Writing Unmodeled and Modeled Medians and Sigmas
+    #Writing Unmodeled and Modeled Medians and Plus or Minuses to excelsheet
     Medians(unmodeled_median, unmodeled_sigma, 7, 8)
     Medians(modeled_median, modeled_sigma, 15, 16)
     
-    #Writing Unmodeled for 1 and 2 sigma
+    #Writing Unmodeled and Modeled ranges for 1 and 2 sigma to excelsheet
     Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1)
     sheet1_row1 = c
     Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2)
@@ -231,7 +231,6 @@ for dict in Oxcal_Data[0:]:
     sheet1_row4 = c
     
     #Adjust sheet_row_num values to keep a consistent 1 row space between samples
-    
     Row_Shift(sheet1_row1, sheet1_row2)
     sheet1_row1 = rowshift1
     sheet1_row2 = rowshift2
@@ -240,6 +239,7 @@ for dict in Oxcal_Data[0:]:
     sheet1_row3 = rowshift1
     sheet1_row4 = rowshift2
     
+    #Adjust rows between unmodeled and modeled dates to keep 1 row space between samples
     Row_adj = sheet1_row2 - sheet1_row3
     if Row_adj < 0:
         sheet1_row2 = sheet1_row2 + abs(Row_adj)
@@ -251,7 +251,6 @@ for dict in Oxcal_Data[0:]:
         sheet1_row2 = sheet1_row3
 
 #Add reference to calibration software used
-#print(sheet1_row1)
 
 Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
                     
