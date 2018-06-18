@@ -55,12 +55,10 @@ else:
         print ("The save file must be a .xlsx or .xls file etension!")
         quit()
           
-#Create Woorkbooks for Oxcal_Data using xlsxwriter
+#Create Workbooks for Oxcal_Data using xlsxwriter
 workbook = xlsxwriter.Workbook(excel_filename)
 Date_ranges = workbook.add_worksheet()
-worksheet2 = workbook.add_worksheet()
 PDF_Graphing = workbook.add_worksheet()
-
 
 #Name varibles for various cell formats
 header = workbook.add_format({'bold': True, 'center_across': True})
@@ -68,6 +66,8 @@ format = workbook.add_format({'num_format': '0', 'center_across': True})
 center = workbook.add_format({'center_across': True})
 percent = workbook.add_format({'num_format': '0.0%', 'center_across': True})
 italics = workbook.add_format({'italic': True})
+probNum = workbook.add_format({'num_format': '0.0000000'})
+one_digit = workbook.add_format({'num_format': '0.0'})
 
 #Set row, col and row_adj variables and row_count list; set header labels; adjust column withds; and advance rows
 sheet1_row1 = 0 
@@ -78,7 +78,6 @@ sheet2_row1 = 0
 sheet2_col1 = 0
 sheet2_row_adj = 0
 row_count = []
-number_samples = 0
 
 Labels = ['Name', 'RYCBP', 'Plus or Minus', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median', 'Plus or Minus', '','Posterior', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median', 'Plus or Minus', 'Agreement', 'Convergence', 'probNorm' ]
 for count, name in enumerate(Labels):
@@ -171,6 +170,49 @@ def Row_Shift (x, y):
         
     return
 
+#Add probabilites and dates to second worksheet to aid in Datagraph usage
+def Probabilities (name, prob, start, resolution):
+    if name == 'unmodeled':
+        header_dates = (list_name + ' dates')
+        header_prob = (list_name + ' prob')
+    elif name == 'modeled':
+        header_dates = (list_name + ' B dates')
+        header_prob = (list_name + ' B prob')
+        
+    global sheet2_row1
+    global sheet2_col1
+    global sheet2_row_adj
+    global row_count
+    
+    PDF_Graphing.write(sheet2_row1, sheet2_col1, header_dates, header)
+    sheet2_col1 += 1
+    PDF_Graphing.write(sheet2_row1, sheet2_col1, header_prob, header)
+    sheet2_row1 += 1
+    
+    #write probability density to worksheet2 and count number of rows
+    for dates in prob:
+        PDF_Graphing.write(sheet2_row1, sheet2_col1, dates)
+        sheet2_row1 += 1
+        sheet2_row_adj += 1
+        row_count.append(sheet2_row_adj)
+        
+    #reset PDF_Graphing row1 back to 1 and create seperate variable for list of start dates
+    sheet2_row1 = 1
+    start_date = start
+    #print(start_date)
+    
+    #write dates of probability density to PDF_Graphing and increment up the start dates by resolution (set in Oxcal calibration)
+    for count in row_count:
+        PDF_Graphing.write(sheet2_row1, sheet2_col1-1, start_date)
+        start_date += resolution
+        sheet2_row1 += 1
+    
+    #reset PDF_Graphing columns, rows, and row_count to necessary values for restart of loop     
+    sheet2_col1 += 1
+    sheet2_row1 = 0
+    sheet2_row_adj = 0
+    row_count = []
+
 #Seperate indices dictonary types from Oxcal_Data list
 for dict in Oxcal_Data[0:]:
     IndvData = dict
@@ -184,7 +226,7 @@ for dict in Oxcal_Data[0:]:
     
     list_op = IndvData['op']
     
-    if list_op == "Sequence" or list_op == "Boundary":
+    if list_op == "Sequence" or list_op == "Boundary" or list_op == "Phase":
         continue
 
     #Sample Name, RCYBP date, and error on RCYBP measurment
@@ -196,9 +238,9 @@ for dict in Oxcal_Data[0:]:
     unmodeled_range = list_liklihood['range']
     unmodeled_median = list_liklihood['median']
     unmodeled_sigma = list_liklihood['sigma']
-    list_prob = list_liklihood['prob']
-    list_start = list_liklihood['start']
-    list_res = list_liklihood['resolution']
+    unmodeled_prob = list_liklihood['prob']
+    unmodeled_start = list_liklihood['start']
+    unmodeled_res = list_liklihood['resolution']
     
     #Modeled Range, Median, Sigma, Probability, Model Agreement, ProbNorm, and Convergence
     list_posterior = IndvData['posterior']
@@ -208,13 +250,16 @@ for dict in Oxcal_Data[0:]:
     modeled_agreement = list_posterior['agreement']
     modeled_probNorm = list_posterior['probNorm']
     modeled_convergence = list_posterior['convergence']
+    modeled_prob = list_posterior['prob']
+    modeled_start = list_posterior['start']
+    modeled_res = list_posterior['resolution']
     
     Date_ranges.write(sheet1_row1, sheet1_col1, list_name)
     Date_ranges.write(sheet1_row1, sheet1_col1+1, list_date, format)
     Date_ranges.write(sheet1_row1, sheet1_col1+2, list_error, format) 
-    Date_ranges.write(sheet1_row1, sheet1_col1+17, modeled_agreement, format) #need another digit
-    Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_convergence, format) #need another digit
-    Date_ranges.write(sheet1_row1, sheet1_col1+19, modeled_probNorm, format) #need 7 digits
+    Date_ranges.write(sheet1_row1, sheet1_col1+17, modeled_agreement, one_digit) 
+    Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_convergence, one_digit) 
+    Date_ranges.write(sheet1_row1, sheet1_col1+19, modeled_probNorm, probNum) 
     
     #Writing Unmodeled and Modeled Medians and Plus or Minuses to excelsheet
     Medians(unmodeled_median, unmodeled_sigma, 7, 8)
@@ -249,9 +294,12 @@ for dict in Oxcal_Data[0:]:
         sheet1_row4 = sheet1_row3
     if Row_adj == 0:
         sheet1_row2 = sheet1_row3
+    
+    #Add to PDF_Graphing sheet dates and probabilities
+    Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res)
+    Probabilities('modeled', modeled_prob, modeled_start, modeled_res)
 
 #Add reference to calibration software used
-
 Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
                     
 workbook.close()
