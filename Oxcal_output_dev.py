@@ -66,8 +66,8 @@ format = workbook.add_format({'num_format': '0', 'center_across': True})
 center = workbook.add_format({'center_across': True})
 percent = workbook.add_format({'num_format': '0.0%', 'center_across': True})
 italics = workbook.add_format({'italic': True})
-probNum = workbook.add_format({'num_format': '0.0000000'})
-one_digit = workbook.add_format({'num_format': '0.0'})
+probNum = workbook.add_format({'num_format': '0.0000000', 'center_across': True})
+one_digit = workbook.add_format({'num_format': '0.0', 'center_across': True})
 
 #Set row, col and row_adj variables and row_count list; set header labels; adjust column withds; and advance rows
 sheet1_row1 = 0 
@@ -79,29 +79,42 @@ sheet2_col1 = 0
 sheet2_row_adj = 0
 row_count = []
 
-Labels = ['Name', 'RYCBP', 'Plus or Minus', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median', 'Plus or Minus', '','Posterior', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median', 'Plus or Minus', 'Agreement', 'Convergence', 'probNorm' ]
+Labels = ['Name', 'RYCBP', 'Plus or Minus', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median','Plus or Minus','Posterior', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median', 'Plus or Minus', 'Agreement', 'Convergence', 'probNorm' ]
 for count, name in enumerate(Labels):
     Date_ranges.write(sheet1_row1, sheet1_col1+count, name, header)
     
-Date_ranges.set_column('D:D', 13)
-Date_ranges.set_column('F:F', 13)
+#Set Column widths
+Date_ranges.set_column('A:A', 20)
+Date_ranges.set_column('C:C', 11)    
+Date_ranges.set_column('D:D', 17)
+Date_ranges.set_column('F:F', 17)
+Date_ranges.set_column('K:K', 17)
+Date_ranges.set_column('I:I', 11)
+Date_ranges.set_column('M:M', 17)
+Date_ranges.set_column('I:I', 11)
+Date_ranges.set_column('P:S', 11)
 
-#Advance and create row varibles necessary for age ranges and percentages; create global c varible
+#Advance and create row varibles necessary for age ranges and percentages
 sheet1_row1+=1
 sheet1_row2+=1
 sheet1_row3 = 1
 sheet1_row4 = 1
 
 #Apply AD or BC labels to median dates
-def Medians(x, y, a, b):
-    if x > 0: 
-        AD_Median = ("AD " + str(int(x)))
+def Medians(Median, Deviation, a, b):
+    
+    cell_format01 = workbook.add_format()
+    cell_format01.set_num_format('0')
+    cell_format01.set_align('center')
+    
+    if Median > 0: 
+        AD_Median = ("AD " + str(int(Median)))
         Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
-        Date_ranges.write(sheet1_row1, sheet1_col1+b, y, format)
-    elif x < 0:
-        BC_Median = ("BC " + str(int(abs(x))))
+        Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+    elif Median < 0:
+        BC_Median = ("BC " + str(int(abs(Median))))
         Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
-        Date_ranges.write(sheet1_row1, sheet1_col1+b, y, format)
+        Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
         
     return
     
@@ -226,78 +239,132 @@ for dict in Oxcal_Data[0:]:
     
     list_op = IndvData['op']
     
-    if list_op == "Sequence" or list_op == "Boundary" or list_op == "Phase":
+    if list_op == "Sequence" or list_op == "Phase":
         continue
-
-    #Sample Name, RCYBP date, and error on RCYBP measurment
-    list_name = IndvData['name']
-    list_date = IndvData['date']
-    list_error = IndvData['error']
     
-    #Unmodeled Range, Median, Sigma, Probability, Range Start, and Resolution
-    unmodeled_range = list_liklihood['range']
-    unmodeled_median = list_liklihood['median']
-    unmodeled_sigma = list_liklihood['sigma']
-    unmodeled_prob = list_liklihood['prob']
-    unmodeled_start = list_liklihood['start']
-    unmodeled_res = list_liklihood['resolution']
+    #Check if Operator is Boundary and pull out posterior information
+    if list_op == "Boundary":
+        
+        list_name = IndvData['name']
+        list_posterior = IndvData['posterior']
+        modeled_range = list_posterior['range']
+        modeled_median = list_posterior['median']
+        modeled_sigma = list_posterior['sigma']
+        modeled_probNorm = list_posterior['probNorm']
+        modeled_convergence = list_posterior['convergence']
+        modeled_prob = list_posterior['prob']
+        modeled_start = list_posterior['start']
+        modeled_res = list_posterior['resolution']
+        
+        boundary_name = list_op + " " + list_name
+        
+        Date_ranges.write(sheet1_row1, sheet1_col1, boundary_name )
+        Date_ranges.write(sheet1_row1, sheet1_col1+17, modeled_convergence, one_digit) 
+        Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_probNorm, probNum)
+        
+        Medians(modeled_median, modeled_sigma, 14, 15)
+        
+        Ranges(modeled_range, 1, 2, 10, 11, sheet1_row3)
+        sheet1_row3 = c
+        
+        Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4)
+        sheet1_row4 = c
+        
+        #Adjust sheet_row_num values to keep a consistent 1 row space between samples
+        Row_Shift(sheet1_row1, sheet1_row2)
+        sheet1_row1 = rowshift1
+        sheet1_row2 = rowshift2
     
-    #Modeled Range, Median, Sigma, Probability, Model Agreement, ProbNorm, and Convergence
-    list_posterior = IndvData['posterior']
-    modeled_range = list_posterior['range']
-    modeled_median = list_posterior['median']
-    modeled_sigma = list_posterior['sigma']
-    modeled_agreement = list_posterior['agreement']
-    modeled_probNorm = list_posterior['probNorm']
-    modeled_convergence = list_posterior['convergence']
-    modeled_prob = list_posterior['prob']
-    modeled_start = list_posterior['start']
-    modeled_res = list_posterior['resolution']
+        Row_Shift(sheet1_row3, sheet1_row4)
+        sheet1_row3 = rowshift1
+        sheet1_row4 = rowshift2
+        
+        #Adjust rows between unmodeled and modeled dates to keep 1 row space between samples
+        Row_adj = sheet1_row2 - sheet1_row3
+        if Row_adj < 0:
+            sheet1_row2 = sheet1_row2 + abs(Row_adj)
+            sheet1_row1 = sheet1_row2
+        if Row_adj > 0: 
+            sheet1_row3 = sheet1_row3 + abs(Row_adj)
+            sheet1_row4 = sheet1_row3
+        if Row_adj == 0:
+            sheet1_row2 = sheet1_row3
     
-    Date_ranges.write(sheet1_row1, sheet1_col1, list_name)
-    Date_ranges.write(sheet1_row1, sheet1_col1+1, list_date, format)
-    Date_ranges.write(sheet1_row1, sheet1_col1+2, list_error, format) 
-    Date_ranges.write(sheet1_row1, sheet1_col1+17, modeled_agreement, one_digit) 
-    Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_convergence, one_digit) 
-    Date_ranges.write(sheet1_row1, sheet1_col1+19, modeled_probNorm, probNum) 
+        #Add to PDF_Graphing sheet dates and probabilities
+        Probabilities('modeled', modeled_prob, modeled_start, modeled_res)
+        
+    #Check if Operator is R_Date and pull out both likelihood and posterior information
+    elif list_op == "R_Date":
+        
+        #Sample Name, RCYBP date, and error on RCYBP measurment
+        list_name = IndvData['name']
+        list_date = IndvData['date']
+        list_error = IndvData['error']
     
-    #Writing Unmodeled and Modeled Medians and Plus or Minuses to excelsheet
-    Medians(unmodeled_median, unmodeled_sigma, 7, 8)
-    Medians(modeled_median, modeled_sigma, 15, 16)
+        #Unmodeled Range, Median, Sigma, Probability, Range Start, and Resolution
+        unmodeled_range = list_liklihood['range']
+        unmodeled_median = list_liklihood['median']
+        unmodeled_sigma = list_liklihood['sigma']
+        unmodeled_prob = list_liklihood['prob']
+        unmodeled_start = list_liklihood['start']
+        unmodeled_res = list_liklihood['resolution']
     
-    #Writing Unmodeled and Modeled ranges for 1 and 2 sigma to excelsheet
-    Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1)
-    sheet1_row1 = c
-    Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2)
-    sheet1_row2 = c
-    Ranges(modeled_range, 1, 2, 11, 12, sheet1_row3)
-    sheet1_row3 = c
-    Ranges(modeled_range, 2, 3, 13, 14, sheet1_row4)
-    sheet1_row4 = c
+        #Modeled Range, Median, Sigma, Probability, Model Agreement, ProbNorm, and Convergence
+        list_posterior = IndvData['posterior']
+        modeled_range = list_posterior['range']
+        modeled_median = list_posterior['median']
+        modeled_sigma = list_posterior['sigma']
+        modeled_agreement = list_posterior['agreement']
+        modeled_probNorm = list_posterior['probNorm']
+        modeled_convergence = list_posterior['convergence']
+        modeled_prob = list_posterior['prob']
+        modeled_start = list_posterior['start']
+        modeled_res = list_posterior['resolution']
     
-    #Adjust sheet_row_num values to keep a consistent 1 row space between samples
-    Row_Shift(sheet1_row1, sheet1_row2)
-    sheet1_row1 = rowshift1
-    sheet1_row2 = rowshift2
+        Date_ranges.write(sheet1_row1, sheet1_col1, list_name)
+        Date_ranges.write(sheet1_row1, sheet1_col1+1, list_date, format)
+        Date_ranges.write(sheet1_row1, sheet1_col1+2, list_error, format) 
+        Date_ranges.write(sheet1_row1, sheet1_col1+16, modeled_agreement, one_digit) 
+        Date_ranges.write(sheet1_row1, sheet1_col1+17, modeled_convergence, one_digit) 
+        Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_probNorm, probNum) 
     
-    Row_Shift(sheet1_row3, sheet1_row4)
-    sheet1_row3 = rowshift1
-    sheet1_row4 = rowshift2
+        #Writing Unmodeled and Modeled Medians and Plus or Minuses to excelsheet
+        Medians(unmodeled_median, unmodeled_sigma, 7, 8)
+        Medians(modeled_median, modeled_sigma, 14, 15)
     
-    #Adjust rows between unmodeled and modeled dates to keep 1 row space between samples
-    Row_adj = sheet1_row2 - sheet1_row3
-    if Row_adj < 0:
-        sheet1_row2 = sheet1_row2 + abs(Row_adj)
-        sheet1_row1 = sheet1_row2
-    if Row_adj > 0: 
-        sheet1_row3 = sheet1_row3 + abs(Row_adj)
-        sheet1_row4 = sheet1_row3
-    if Row_adj == 0:
-        sheet1_row2 = sheet1_row3
+        #Writing Unmodeled and Modeled ranges for 1 and 2 sigma to excelsheet
+        Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1)
+        sheet1_row1 = c
+        Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2)
+        sheet1_row2 = c
+        Ranges(modeled_range, 1, 2, 10, 11, sheet1_row3)
+        sheet1_row3 = c
+        Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4)
+        sheet1_row4 = c
     
-    #Add to PDF_Graphing sheet dates and probabilities
-    Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res)
-    Probabilities('modeled', modeled_prob, modeled_start, modeled_res)
+        #Adjust sheet_row_num values to keep a consistent 1 row space between samples
+        Row_Shift(sheet1_row1, sheet1_row2)
+        sheet1_row1 = rowshift1
+        sheet1_row2 = rowshift2
+    
+        Row_Shift(sheet1_row3, sheet1_row4)
+        sheet1_row3 = rowshift1
+        sheet1_row4 = rowshift2
+    
+        #Adjust rows between unmodeled and modeled dates to keep 1 row space between samples
+        Row_adj = sheet1_row2 - sheet1_row3
+        if Row_adj < 0:
+            sheet1_row2 = sheet1_row2 + abs(Row_adj)
+            sheet1_row1 = sheet1_row2
+        if Row_adj > 0: 
+            sheet1_row3 = sheet1_row3 + abs(Row_adj)
+            sheet1_row4 = sheet1_row3
+        if Row_adj == 0:
+            sheet1_row2 = sheet1_row3
+    
+        #Add to PDF_Graphing sheet dates and probabilities
+        Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res)
+        Probabilities('modeled', modeled_prob, modeled_start, modeled_res)
 
 #Add reference to calibration software used
 Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
@@ -306,12 +373,3 @@ workbook.close()
 
 
         
-'''     This is something to play around with, perhaps if I make this all a function I could include agruments about which prob density scheme to use.  
-        #write probability density to worksheet2 and count number of rows
-        for prob in list_prob:
-            mod_prob = (prob/2) + number_samples
-            worksheet2.write(sheet2_row1, sheet2_col1, mod_prob)
-            sheet2_row1 += 1
-            sheet2_row_adj += 1
-            row_count.append(sheet2_row_adj)
-'''
