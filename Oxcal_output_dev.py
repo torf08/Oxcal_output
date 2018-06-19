@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This script is designed to use json strings generated from the javascript files produced by the Oxcal 14C calibration plugin for Firefox. 
+This script is designed to use json strings generated from the javascript files produced by the Oxcal 14C calibration program. See -- https://c14.arch.ox.ac.uk/oxcalhelp/readme.html#local for instructions on local or server installations. 
 
 It is intended to be run using python3 with tcl-tk built-in. See -- https://stackoverflow.com/questions/36760839/why-my-python-installed-via-home-brew-not-include-tkinter
 for information on how to install python3 with tcl-tk on Mac and Linux machines.
@@ -23,12 +23,12 @@ import xlsxwriter
 root = Tk()
 root.withdraw()
 
-#ask for and equal .JSON file to variable json_filename & ask for and save excel file name and location
+#ask for and set .JSON file to variable json_filename & ask for and save excel file name and location
 json_filename=filedialog.askopenfile(initialdir ="~/", title = "Select .json file", filetypes = (("json files", "*.json"),("all files","*.*")))
 
 excel_filename = filedialog.asksaveasfilename(initialdir ="~/", title = "Save to .xlsx file", filetypes = (("Excel Workbook", "*.xlsx"),("Excel Workbook", "*.xls"),("all files","*.*")))
 
-#Check that both json and excel file chosen properly
+#Check that both json and excel file are chosen properly
 if json_filename == None:
     print ("No file selected for open file. Should be a .json")
     quit()
@@ -103,6 +103,7 @@ sheet1_row4 = 1
 #Apply AD or BC labels to median dates
 def Medians(Median, Deviation, a, b):
     
+    #Had to set specific cell format for Plus or Minus column as "format" cell designation wasn't working inside function
     cell_format01 = workbook.add_format()
     cell_format01.set_num_format('0')
     cell_format01.set_align('center')
@@ -154,7 +155,6 @@ def Ranges(range, indpos1, indpos2, col1, col2, row):
                 Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
             
             Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
-            
             
             c += 1
             
@@ -209,12 +209,12 @@ def Probabilities (name, prob, start, resolution):
         sheet2_row_adj += 1
         row_count.append(sheet2_row_adj)
         
-    #reset PDF_Graphing row1 back to 1 and create seperate variable for list of start dates
+    #reset PDF_Graphing row1 back to 1 and create seperate variable for list of dates beginning with start date
     sheet2_row1 = 1
     start_date = start
     #print(start_date)
     
-    #write dates of probability density to PDF_Graphing and increment up the start dates by resolution (set in Oxcal calibration)
+    #write dates of probability density to PDF_Graphing and increment up from the start date by resolution (set in Oxcal calibration)
     for count in row_count:
         PDF_Graphing.write(sheet2_row1, sheet2_col1-1, start_date)
         start_date += resolution
@@ -227,8 +227,7 @@ def Probabilities (name, prob, start, resolution):
     row_count = []
 
 #Seperate indices dictonary types from Oxcal_Data list
-for dict in Oxcal_Data[0:]:
-    IndvData = dict
+for IndvData in Oxcal_Data:
     
     list_liklihood = IndvData['likelihood']
     list_comment = list_liklihood['comment']
@@ -242,7 +241,7 @@ for dict in Oxcal_Data[0:]:
     if list_op == "Sequence" or list_op == "Phase":
         continue
     
-    #Check if Operator is Boundary and pull out posterior information
+    #Check if Operator is Boundary and pull out posterior information for Boundary Ranges
     if list_op == "Boundary":
         
         list_name = IndvData['name']
@@ -269,26 +268,10 @@ for dict in Oxcal_Data[0:]:
         
         Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4)
         sheet1_row4 = c
-        
-        #Adjust sheet_row_num values to keep a consistent 1 row space between samples
-        Row_Shift(sheet1_row1, sheet1_row2)
-        sheet1_row1 = rowshift1
-        sheet1_row2 = rowshift2
     
         Row_Shift(sheet1_row3, sheet1_row4)
         sheet1_row3 = rowshift1
         sheet1_row4 = rowshift2
-        
-        #Adjust rows between unmodeled and modeled dates to keep 1 row space between samples
-        Row_adj = sheet1_row2 - sheet1_row3
-        if Row_adj < 0:
-            sheet1_row2 = sheet1_row2 + abs(Row_adj)
-            sheet1_row1 = sheet1_row2
-        if Row_adj > 0: 
-            sheet1_row3 = sheet1_row3 + abs(Row_adj)
-            sheet1_row4 = sheet1_row3
-        if Row_adj == 0:
-            sheet1_row2 = sheet1_row3
     
         #Add to PDF_Graphing sheet dates and probabilities
         Probabilities('modeled', modeled_prob, modeled_start, modeled_res)
