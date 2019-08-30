@@ -368,6 +368,7 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
     sheet2_col1 = 0    
     sheet2_row_adj = 0
     row_count = []
+    record_count = 0
     
     Labels = ['Name', 'RYCBP', 'Plus or Minus', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median','Plus or Minus']
     for count, name in enumerate(Labels):
@@ -468,10 +469,11 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         return
 
     #Add probabilites and dates to second worksheet to aid in Datagraph usage
-    def Probabilities (name, prob, start, resolution, x, y , z, a):
+    def Probabilities (name, prob, start, resolution, x, y , z, a, b):
         if name == 'unmodeled':
             header_dates = (list_name + ' _dates')
             header_prob = (list_name + ' _prob')
+            header_prob_mod = (list_name + 'prob_mod')
         elif name == 'modeled':
             header_dates = (list_name + ' B dates')
             header_prob = (list_name + ' B prob')
@@ -480,20 +482,32 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         global col1
         global row_adj
         global rowcount
+        global record_count
         
         row1 = x
         col1 = y
         row_adj = z
         rowcount = a
+        record_count = b
+        
+        
     
-        PDF_Graphing.write(row1, col1, header_dates, header)
+        PDF_Graphing.write(row1, col1, header_dates,  header)
         col1 += 1
+        col_prob_mod = col1 + 1
+        
+        print (col1, col_prob_mod)
         PDF_Graphing.write(row1, col1, header_prob, header)
+        PDF_Graphing.write(row1, col_prob_mod, header_prob_mod, header)
         row1 += 1
-    
         #write probability density to worksheet2 and count number of rows
         for dates in prob:
+            prob_mod = (dates/2) + record_count
+            
             PDF_Graphing.write(row1, col1, dates)
+            PDF_Graphing.write(row1, col_prob_mod, prob_mod)
+            #print(dates)
+            #print(prob_mod)
             row1 += 1
             row_adj += 1
             rowcount.append(row_adj)
@@ -501,7 +515,7 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         #reset PDF_Graphing row1 back to 1 and create seperate variable for list of dates beginning with start date
         row1 = 1
         start_date = start
-        #print(start_date)
+        print(start_date)
     
         #write dates of probability density to PDF_Graphing and increment up from the start date by resolution (set in Oxcal calibration)
         for count in row_count:
@@ -510,7 +524,7 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
             row1 += 1
             
         #reset PDF_Graphing columns, rows, and row_count to necessary values for restart of loop     
-        col1 += 1
+        col1 += 2
         row1 = 0
         row_adj = 0
         rowcount = []
@@ -568,11 +582,14 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
             sheet1_row2 = rowshift2
     
             #Add to PDF_Graphing sheet dates and probabilities
-            Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count)
+            Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count, record_count)
             sheet2_row1 = row1
             sheet2_col1 = col1
             sheet2_row_adj = row_adj
             row_count = rowcount
+            
+            record_count += 0.75
+            
             
     #Add reference to calibration software used
     Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
