@@ -40,8 +40,13 @@ parser.add_argument('Bayesian', metavar = 'Yes or No', type = str, nargs = '?', 
 
 '''
 
+
+
 #Simpler way to prompt user to determine which method to use from Define_Functions
-Bayesian = int(input("Does this file contain Bayesian model data? 1 for Yes or 0 for No:"))
+Bayesian = int(input("Does this file contain Bayesian model data? 1 for Yes or 0 for No: "))
+
+#What age scale should be used? 
+Age_Scale = int(input("What age scale should be used? 1 for BC/AD, 2 for BCE/CE or 3 for Cal BP: "))
 
 #ask for and set .JSON file to variable json_filename & ask for and save excel file name and location
 json_filename=filedialog.askopenfile(initialdir ="~/", title = "Select .json file", filetypes = (("json files", "*.json"),("all files","*.*")))
@@ -77,11 +82,11 @@ else:
         
 #Use user input to determine function to use 
 if Bayesian == 1:
-    Bayesian_Workbook(excel_filename, Oxcal_Data)
+    Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale)
     print("Opening Bayesian Output")
     
 elif Bayesian == 0:
-    Non_Bayesian_Workbook(excel_filename, Oxcal_Data)
+    Non_Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale)
     print("Opening Non-Bayesian Output")
 else:
     print("Only 1 or 0 are accepted responses!")

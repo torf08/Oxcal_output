@@ -1,7 +1,7 @@
 import xlsxwriter
 
 #Workbook with columns and headers set for Bayesian .json file
-def Bayesian_Workbook(excel_filename, Oxcal_Data): 
+def Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale): 
     #Create Workbooks for Oxcal_Data using xlsxwriter
     workbook = xlsxwriter.Workbook(excel_filename)
     Date_ranges = workbook.add_worksheet()
@@ -28,6 +28,8 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
     sheet2_col1 = 0    
     sheet2_row_adj = 0
     row_count = []
+    global record_count
+    record_count = 0 
 
     Labels = ['Name', 'RYCBP', 'Plus or Minus', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median','Plus or Minus','Posterior', '1s.d. Cal', '%', '2s.d. Cal', '%', 'Median', 'Plus or Minus', 'Agreement', 'Convergence', 'probNorm' ]
     for count, name in enumerate(Labels):
@@ -49,64 +51,126 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
     sheet1_row2+=1
     
     #Apply AD or BC labels to median dates
-    def Medians(Median, Deviation, a, b):
+    def Medians(Median, Deviation, a, b, Age_Scale):
     
         #Had to set specific cell format for Plus or Minus column as "format" cell designation wasn't working inside function
         cell_format01 = workbook.add_format()
         cell_format01.set_num_format('0')
         cell_format01.set_align('center')
-    
-        if Median > 0: 
-            AD_Median = ("AD " + str(int(Median)))
-            Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
-            Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
-        elif Median < 0:
-            BC_Median = ("BC " + str(int(abs(Median))))
-            Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
-            Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+        
+        if Age_Scale == 1:
+            if Median > 0: 
+                AD_Median = ("AD " + str(int(Median)))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+            elif Median < 0:
+                BC_Median = ("BC " + str(int(abs(Median))))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+        elif Age_Scale == 2:
+            if Median > 0: 
+                AD_Median = ("CE " + str(int(Median)))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+            elif Median < 0:
+                BC_Median = ("BCE " + str(int(abs(Median))))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+        else:
+           Cal_BP_Median = round(1949 - Median)
+           Date_ranges.write(sheet1_row1, sheet1_col1+a, Cal_BP_Median, center)
+           Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
         
         return
     
     #Seperate and write to spreadsheet probabilities
-    def Ranges(range, indpos1, indpos2, col1, col2, row):
+    def Ranges(range, indpos1, indpos2, col1, col2, row, Age_Scale):
     
         global c
         c = row
     
         for prob in range[indpos1:indpos2]:
             step_in_1a = prob
-            #print (step_in_1a)
-            for sets in step_in_1a:
-                step_in_2a = sets
-                step_in_3a = step_in_2a[0]
-                step_in_3b = step_in_2a[1]
-                step_in_3c = (step_in_2a[2]/100)
             
-                if step_in_3a >= 0:
-                    AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
-                    str(int(step_in_3b)))
-                    Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
-                
-                elif step_in_3a <= 0 and step_in_3b <= 0:
-                    step_in_3a = abs(step_in_3a)
-                    step_in_3b = abs(step_in_3b)
-                
-                    BC_Date = ('BC ' + str(int(step_in_3a)) + '- BC ' + 
-                    str(int(step_in_3b)))
-                    Date_ranges.write(c, sheet1_col1+col1, BC_Date, center)
-                
-                else:
-                    step_in_3a = abs(step_in_3a)
-                
-                    BC_AD_Date = ('BC ' + str(int(step_ind_3a)) + '- AD '+ 
-                    str(int(step_in_3b)))
-                    Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
+            if Age_Scale == 1:
+                for sets in step_in_1a:
+                    step_in_2a = sets
+                    step_in_3a = step_in_2a[0]
+                    step_in_3b = step_in_2a[1]
+                    step_in_3c = (step_in_2a[2]/100)
             
-                Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+                    if step_in_3a >= 0:
+                        AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                
+                    elif step_in_3a <= 0 and step_in_3b <= 0:
+                        step_in_3a = abs(step_in_3a)
+                        step_in_3b = abs(step_in_3b)
+                
+                        BC_Date = ('BC ' + str(int(step_in_3a)) + '- BC ' + 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BC_Date, center)
+                
+                    else:
+                        step_in_3a = abs(step_in_3a)
+                
+                        BC_AD_Date = ('BC ' + str(int(step_ind_3a)) + '- AD '+ 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
+                        
+                    Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+                    
+                    c += 1
+                    
+            elif Age_Scale == 2:
+                for sets in step_in_1a:
+                    step_in_2a = sets
+                    step_in_3a = step_in_2a[0]
+                    step_in_3b = step_in_2a[1]
+                    step_in_3c = (step_in_2a[2]/100)
+        
+                    if step_in_3a >= 0:
+                        CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
             
-                c += 1
+                    elif step_in_3a <= 0 and step_in_3b <= 0:
+                        step_in_3a = abs(step_in_3a)
+                        step_in_3b = abs(step_in_3b)
             
-            return
+                        BCE_Date = ('BCE ' + str(int(step_in_3a)) + '- BCE ' + 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BCE_Date, center)
+                        
+                    else:
+                        step_in_3a = abs(step_in_3a)
+                        
+                        BCE_CE_Date = ('BCE ' + str(int(step_ind_3a)) + '- CE '+ 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BCE_CE_Date, center)
+                        
+                    Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+                    
+                    c += 1
+                    
+            else:
+                for sets in step_in_1a:
+                    step_in_2a = sets
+                    step_in_3a = str(round(1949 - step_in_2a[0]))
+                    step_in_3b = str(round(1949 - step_in_2a[1]))
+                    step_in_3c = (step_in_2a[2]/100)
+                    
+
+
+                    Cal_BP_Date = (step_in_3a + '-' + step_in_3b + ' Cal Yr BP')
+                    Date_ranges.write(c, sheet1_col1+col1, Cal_BP_Date, center)
+        
+                    Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+        
+                    c += 1
+                    
+                return
     
     #Determine number of rows that each samples probability ranges used. Correct the rowshift so that a 1 row spacing is kept between each sample.
     def Row_Shift (x, y):
@@ -132,13 +196,15 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
         return
 
     #Add probabilites and dates to second worksheet to aid in Datagraph usage
-    def Probabilities (name, prob, start, resolution, x, y , z, a):
+    def Probabilities (name, prob, start, resolution, x, y , z, a, Age_Scale):
         if name == 'unmodeled':
             header_dates = (list_name + ' _dates')
             header_prob = (list_name + ' _prob')
+            header_prob_mod = (list_name + 'prob_mod')
         elif name == 'modeled':
-            header_dates = (list_name + ' _Bayes_dates')
-            header_prob = (list_name + ' _Bayes_prob')
+            header_dates = (list_name + ' B dates')
+            header_prob = (list_name + ' B prob')
+            header_prob_mod = (list_name + 'prob_mod')
     
         global row1
         global col1
@@ -150,35 +216,48 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
         row_adj = z
         rowcount = a
     
-        PDF_Graphing.write(row1, col1, header_dates, header)
+        PDF_Graphing.write(row1, col1, header_dates,  header)
         col1 += 1
+        col_prob_mod = col1 + 1
+
         PDF_Graphing.write(row1, col1, header_prob, header)
+        PDF_Graphing.write(row1, col_prob_mod, header_prob_mod, header)
         row1 += 1
-    
         #write probability density to worksheet2 and count number of rows
         for dates in prob:
+            prob_mod = (dates/2) + record_count
             PDF_Graphing.write(row1, col1, dates)
+            PDF_Graphing.write(row1, col_prob_mod, prob_mod)
+            #print(dates)
+            #print(prob_mod)
             row1 += 1
             row_adj += 1
             rowcount.append(row_adj)
         
         #reset PDF_Graphing row1 back to 1 and create seperate variable for list of dates beginning with start date
         row1 = 1
-        start_date = start
-        #print(start_date)
+        if Age_Scale == 1 or Age_Scale == 2:
+            start_date = start
+        else: 
+            start_date = 1949 - start
     
         #write dates of probability density to PDF_Graphing and increment up from the start date by resolution (set in Oxcal calibration)
         for count in row_count:
-            PDF_Graphing.write(row1, col1-1, start_date)
-            start_date += resolution
-            row1 += 1
-            
+            if Age_Scale == 1 or Age_Scale == 2:
+                PDF_Graphing.write(row1, col1-1, start_date)
+                start_date += resolution
+                row1 += 1
+            else:
+                PDF_Graphing.write(row1, col1-1, start_date)
+                start_date -= resolution
+                row1 += 1
         #reset PDF_Graphing columns, rows, and row_count to necessary values for restart of loop     
-        col1 += 1
+        col1 += 2
         row1 = 0
         row_adj = 0
         rowcount = []
         
+        print (record_count)
         return
     
     #Seperate indices dictonary types from Oxcal_Data list
@@ -211,19 +290,17 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
             modeled_res = list_posterior['resolution']
         
             boundary_name = list_op + " " + list_name
-            
-            print(boundary_name)
         
             Date_ranges.write(sheet1_row1, sheet1_col1, boundary_name )
             Date_ranges.write(sheet1_row1, sheet1_col1+17, modeled_convergence, one_digit) 
             Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_probNorm, probNum)
         
-            Medians(modeled_median, modeled_sigma, 14, 15)
+            Medians(modeled_median, modeled_sigma, 14, 15, Age_Scale)
         
-            Ranges(modeled_range, 1, 2, 10, 11, sheet1_row3)
+            Ranges(modeled_range, 1, 2, 10, 11, sheet1_row3, Age_Scale)
             sheet1_row3 = c
         
-            Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4)
+            Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4, Age_Scale)
             sheet1_row4 = c
     
             Row_Shift(sheet1_row3, sheet1_row4)
@@ -241,17 +318,15 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
             if Row_adj == 0:
                 sheet1_row2 = sheet1_row3
             
-            print(sheet1_row1)
-            print(sheet1_row2)
-            print(sheet1_row3)
-            print(sheet1_row4)
-            
+            print (Age_Scale)
             #Add to PDF_Graphing sheet dates and probabilities
-            Probabilities('modeled', modeled_prob, modeled_start, modeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count)
+            Probabilities('modeled', modeled_prob, modeled_start, modeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count, Age_Scale)
             sheet2_col1 = col1
             sheet2_row1 = row1
             sheet2_row_adj = row_adj
             row_count = rowcount
+            
+            record_count += 0.75
         
         #Check if Operator is R_Date and pull out both likelihood and posterior information
         elif list_op == "R_Date":
@@ -289,17 +364,17 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
             Date_ranges.write(sheet1_row1, sheet1_col1+18, modeled_probNorm, probNum) 
     
             #Writing Unmodeled and Modeled Medians and Plus or Minuses to excelsheet
-            Medians(unmodeled_median, unmodeled_sigma, 7, 8)
-            Medians(modeled_median, modeled_sigma, 14, 15)
+            Medians(unmodeled_median, unmodeled_sigma, 7, 8, Age_Scale)
+            Medians(modeled_median, modeled_sigma, 14, 15, Age_Scale)
     
             #Writing Unmodeled and Modeled ranges for 1 and 2 sigma to excelsheet
-            Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1)
+            Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1, Age_Scale)
             sheet1_row1 = c
-            Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2)
+            Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2, Age_Scale)
             sheet1_row2 = c
-            Ranges(modeled_range, 1, 2, 10, 11, sheet1_row3)
+            Ranges(modeled_range, 1, 2, 10, 11, sheet1_row3, Age_Scale)
             sheet1_row3 = c
-            Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4)
+            Ranges(modeled_range, 2, 3, 12, 13, sheet1_row4, Age_Scale)
             sheet1_row4 = c
     
             #Adjust sheet_row_num values to keep a consistent 1 row space between samples
@@ -323,18 +398,20 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
                 sheet1_row2 = sheet1_row3
     
             #Add to PDF_Graphing sheet dates and probabilities
-            Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count)
+            Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count, Age_Scale)
             sheet2_row1 = row1
             sheet2_col1 = col1
             sheet2_row_adj = row_adj
             row_count = rowcount
             
             
-            Probabilities('modeled', modeled_prob, modeled_start, modeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count)
+            Probabilities('modeled', modeled_prob, modeled_start, modeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count, Age_Scale)
             sheet2_row1 = row1
             sheet2_col1 = col1
             sheet2_row_adj = row_adj
             row_count = rowcount
+            
+            record_count += 0.75
 
     #Add reference to calibration software used
     Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
@@ -342,7 +419,7 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data):
     workbook.close()
 
 #Workbook with columns and headers set for non-Bayesian .json file    
-def Non_Bayesian_Workbook(excel_filename, Oxcal_Data): 
+def Non_Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale): 
     
     #Create Workbooks for Oxcal_Data using xlsxwriter
     workbook = xlsxwriter.Workbook(excel_filename)
@@ -386,64 +463,126 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
     sheet1_row2+=1
     
     #Apply AD or BC labels to median dates
-    def Medians(Median, Deviation, a, b):
+    def Medians(Median, Deviation, a, b, Age_Scale):
     
         #Had to set specific cell format for Plus or Minus column as "format" cell designation wasn't working inside function
         cell_format01 = workbook.add_format()
         cell_format01.set_num_format('0')
         cell_format01.set_align('center')
-    
-        if Median > 0: 
-            AD_Median = ("AD " + str(int(Median)))
-            Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
-            Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
-        elif Median < 0:
-            BC_Median = ("BC " + str(int(abs(Median))))
-            Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
-            Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+        
+        if Age_Scale == 1:
+            if Median > 0: 
+                AD_Median = ("AD " + str(int(Median)))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+            elif Median < 0:
+                BC_Median = ("BC " + str(int(abs(Median))))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+        elif Age_Scale == 2:
+            if Median > 0: 
+                AD_Median = ("CE " + str(int(Median)))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, AD_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+            elif Median < 0:
+                BC_Median = ("BCE " + str(int(abs(Median))))
+                Date_ranges.write(sheet1_row1, sheet1_col1+a, BC_Median, center)
+                Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
+        else:
+           Cal_BP_Median = round(1949 - Median)
+           Date_ranges.write(sheet1_row1, sheet1_col1+a, Cal_BP_Median, center)
+           Date_ranges.write(sheet1_row1, sheet1_col1+b, Deviation, cell_format01)
         
         return
     
     #Seperate and write to spreadsheet probabilities
-    def Ranges(range, indpos1, indpos2, col1, col2, row):
+    def Ranges(range, indpos1, indpos2, col1, col2, row, Age_Scale):
     
         global c
         c = row
     
         for prob in range[indpos1:indpos2]:
             step_in_1a = prob
-            #print (step_in_1a)
-            for sets in step_in_1a:
-                step_in_2a = sets
-                step_in_3a = step_in_2a[0]
-                step_in_3b = step_in_2a[1]
-                step_in_3c = (step_in_2a[2]/100)
             
-                if step_in_3a >= 0:
-                    AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
-                    str(int(step_in_3b)))
-                    Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
-                
-                elif step_in_3a <= 0 and step_in_3b <= 0:
-                    step_in_3a = abs(step_in_3a)
-                    step_in_3b = abs(step_in_3b)
-                
-                    BC_Date = ('BC ' + str(int(step_in_3a)) + '- BC ' + 
-                    str(int(step_in_3b)))
-                    Date_ranges.write(c, sheet1_col1+col1, BC_Date, center)
-                
-                else:
-                    step_in_3a = abs(step_in_3a)
-                
-                    BC_AD_Date = ('BC ' + str(int(step_ind_3a)) + '- AD '+ 
-                    str(int(step_in_3b)))
-                    Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
+            if Age_Scale == 1:
+                for sets in step_in_1a:
+                    step_in_2a = sets
+                    step_in_3a = step_in_2a[0]
+                    step_in_3b = step_in_2a[1]
+                    step_in_3c = (step_in_2a[2]/100)
             
-                Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+                    if step_in_3a >= 0:
+                        AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                
+                    elif step_in_3a <= 0 and step_in_3b <= 0:
+                        step_in_3a = abs(step_in_3a)
+                        step_in_3b = abs(step_in_3b)
+                
+                        BC_Date = ('BC ' + str(int(step_in_3a)) + '- BC ' + 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BC_Date, center)
+                
+                    else:
+                        step_in_3a = abs(step_in_3a)
+                
+                        BC_AD_Date = ('BC ' + str(int(step_ind_3a)) + '- AD '+ 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
+                        
+                    Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+                    
+                    c += 1
+                    
+            elif Age_Scale == 2:
+                for sets in step_in_1a:
+                    step_in_2a = sets
+                    step_in_3a = step_in_2a[0]
+                    step_in_3b = step_in_2a[1]
+                    step_in_3c = (step_in_2a[2]/100)
+        
+                    if step_in_3a >= 0:
+                        CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
             
-                c += 1
+                    elif step_in_3a <= 0 and step_in_3b <= 0:
+                        step_in_3a = abs(step_in_3a)
+                        step_in_3b = abs(step_in_3b)
             
-            return
+                        BCE_Date = ('BCE ' + str(int(step_in_3a)) + '- BCE ' + 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BCE_Date, center)
+                        
+                    else:
+                        step_in_3a = abs(step_in_3a)
+                        
+                        BCE_CE_Date = ('BCE ' + str(int(step_ind_3a)) + '- CE '+ 
+                        str(int(step_in_3b)))
+                        Date_ranges.write(c, sheet1_col1+col1, BCE_CE_Date, center)
+                        
+                    Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+                    
+                    c += 1
+                    
+            else:
+                for sets in step_in_1a:
+                    step_in_2a = sets
+                    step_in_3a = str(round(1949 - step_in_2a[0]))
+                    step_in_3b = str(round(1949 - step_in_2a[1]))
+                    step_in_3c = (step_in_2a[2]/100)
+                    
+
+
+                    Cal_BP_Date = (step_in_3a + '-' + step_in_3b + ' Cal Yr BP')
+                    Date_ranges.write(c, sheet1_col1+col1, Cal_BP_Date, center)
+        
+                    Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
+        
+                    c += 1
+                    
+                return
     
     #Determine number of rows that each samples probability ranges used. Correct the rowshift so that a 1 row spacing is kept between each sample.
     def Row_Shift (x, y):
@@ -469,7 +608,7 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         return
 
     #Add probabilites and dates to second worksheet to aid in Datagraph usage
-    def Probabilities (name, prob, start, resolution, x, y , z, a, b):
+    def Probabilities (name, prob, start, resolution, x, y , z, a, b, Age_Scale):
         if name == 'unmodeled':
             header_dates = (list_name + ' _dates')
             header_prob = (list_name + ' _prob')
@@ -489,8 +628,6 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         row_adj = z
         rowcount = a
         record_count = b
-        
-        
     
         PDF_Graphing.write(row1, col1, header_dates,  header)
         col1 += 1
@@ -503,7 +640,6 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         #write probability density to worksheet2 and count number of rows
         for dates in prob:
             prob_mod = (dates/2) + record_count
-            
             PDF_Graphing.write(row1, col1, dates)
             PDF_Graphing.write(row1, col_prob_mod, prob_mod)
             #print(dates)
@@ -514,15 +650,21 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
         
         #reset PDF_Graphing row1 back to 1 and create seperate variable for list of dates beginning with start date
         row1 = 1
-        start_date = start
-        print(start_date)
+        if Age_Scale == 1 or Age_Scale == 2:
+            start_date = start
+        else: 
+            start_date = 1949 - start
     
         #write dates of probability density to PDF_Graphing and increment up from the start date by resolution (set in Oxcal calibration)
         for count in row_count:
-            PDF_Graphing.write(row1, col1-1, start_date)
-            start_date += resolution
-            row1 += 1
-            
+            if Age_Scale == 1 or Age_Scale == 2:
+                PDF_Graphing.write(row1, col1-1, start_date)
+                start_date += resolution
+                row1 += 1
+            else:
+                PDF_Graphing.write(row1, col1-1, start_date)
+                start_date -= resolution
+                row1 += 1
         #reset PDF_Graphing columns, rows, and row_count to necessary values for restart of loop     
         col1 += 2
         row1 = 0
@@ -568,12 +710,12 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
             Date_ranges.write(sheet1_row1, sheet1_col1+2, list_error, format) 
             
             #Writing Unmodeled Medians and Plus or Minuses to excelsheet
-            Medians(unmodeled_median, unmodeled_sigma, 7, 8)
+            Medians(unmodeled_median, unmodeled_sigma, 7, 8, Age_Scale)
     
             #Writing Unmodeled and Modeled ranges for 1 and 2 sigma to excelsheet
-            Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1)
+            Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1, Age_Scale)
             sheet1_row1 = c
-            Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2)
+            Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2, Age_Scale)
             sheet1_row2 = c
     
             #Adjust sheet_row_num values to keep a consistent 1 row space between samples
@@ -582,7 +724,7 @@ def Non_Bayesian_Workbook(excel_filename, Oxcal_Data):
             sheet1_row2 = rowshift2
     
             #Add to PDF_Graphing sheet dates and probabilities
-            Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count, record_count)
+            Probabilities('unmodeled', unmodeled_prob, unmodeled_start, unmodeled_res, sheet2_row1, sheet2_col1, sheet2_row_adj, row_count, record_count, Age_Scale)
             sheet2_row1 = row1
             sheet2_col1 = col1
             sheet2_row_adj = row_adj
