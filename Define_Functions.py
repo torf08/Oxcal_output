@@ -115,7 +115,7 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale):
                     else:
                         step_in_3a = abs(step_in_3a)
                 
-                        BC_AD_Date = ('BC ' + str(int(step_ind_3a)) + '- AD '+ 
+                        BC_AD_Date = ('BC ' + str(int(step_in_3a)) + '- AD '+ 
                         str(int(step_in_3b)))
                         Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
                         
@@ -204,7 +204,7 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale):
         elif name == 'modeled':
             header_dates = (list_name + ' B dates')
             header_prob = (list_name + ' B prob')
-            header_prob_mod = (list_name + 'prob_mod')
+            header_prob_mod = (list_name + 'B prob_mod')
     
         global row1
         global col1
@@ -276,7 +276,7 @@ def Bayesian_Workbook(excel_filename, Oxcal_Data, Age_Scale):
             continue
     
         #Check if Operator is Boundary and pull out posterior information for Boundary Ranges
-        if list_op == "Boundary":
+        if list_op == "Boundary" or list_op == "Span" or list_op == "Interval" or list_op == "Start" or list_op == "End" or list_op == "Transition" or list_op == "After" or list_op == "Before" or list_op == "Outlier_Model":
         
             list_name = IndvData['name']
             list_posterior = IndvData['posterior']

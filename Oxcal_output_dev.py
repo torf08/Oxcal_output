@@ -40,8 +40,6 @@ parser.add_argument('Bayesian', metavar = 'Yes or No', type = str, nargs = '?', 
 
 '''
 
-
-
 #Simpler way to prompt user to determine which method to use from Define_Functions
 Bayesian = int(input("Does this file contain Bayesian model data? 1 for Yes or 0 for No: "))
 
@@ -65,6 +63,7 @@ else:
         print ("Opening read file")
         Oxcal_Data=json.load(json_filename)
         json_filename.close()
+        print (type(Oxcal_Data))
     else:
         print ("The selected file must be a .json file extension!")
         quit()
