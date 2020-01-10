@@ -1,4 +1,4 @@
-!/usr/bin/env python3
+#!/usr/bin/env python3
 
 """
 This script is designed to use json strings generated from the javascript files produced by the Oxcal 14C calibration program. See -- https://c14.arch.ox.ac.uk/oxcalhelp/readme.html#local for instructions on local or server installations. 
@@ -18,15 +18,14 @@ Planned improvements include writing a GUI window with tkinter and tk for all as
 Contact Matthew A. Fort (fort1@illinois.edu) with any questions, concerns or ideas for possible improvements 
 """ 
 
-#import tkinter for gui uses, JSON parser to load JSON string, and xlsxwriter to create and write to an excelsheet
+#import tkinter for gui uses, JSON parser to load JSON string, and xlsxwriter to create and write to an excelsheet and os to open excel file after creation
 
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import *
 import json
 import xlsxwriter
-#import argparse
-
+import os
 
 #Main Tk Window Frame
 root = tk.Tk()
@@ -38,7 +37,7 @@ Age_Scale = tk.IntVar()
 excel_filename = tk.StringVar()
 json_filename = tk.StringVar()
         
-class Application(tk.Frame):
+class Oxcal_output(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
@@ -66,9 +65,12 @@ class Application(tk.Frame):
         self.Blank_2 = tk.Label(self, text = "")
         self.Blank_2.grid(row = 6, column = 2)
         
+        self.files_loaded = tk.Label(self, text="")
+        self.files_loaded.grid(row = 7, column = 1)
+        
         self.Bayesian_Label = tk.Label(self, text="Does the JSON file\n contain Bayesian\n modeling data?")
         self.Bayesian_1 = tk.Radiobutton(self, text = "Yes", variable = Bayesian, value = 1)
-        self.Bayesian_0 = tk.Radiobutton(self, text = "No", variable = Bayesian, value = 0)
+        self.Bayesian_2 = tk.Radiobutton(self, text = "No", variable = Bayesian, value = 2)
         
         self.AgeScale_Label = tk.Label(self, text = "What age scale\nshould be used?")
         self.AgeScale_0 = tk.Radiobutton(self, text = "BCE/CE", variable = Age_Scale, value = 2)
@@ -80,8 +82,9 @@ class Application(tk.Frame):
         
         self.cont.grid(row = 7, column = 0)
         self.quit.grid(row=7, column = 2)
-        self.Bayesian_0.grid(row = 3, column = 2)
+        
         self.Bayesian_1.grid(row = 3, column = 0)
+        self.Bayesian_2.grid(row = 3, column = 2)
         self.Bayesian_Label.grid(row = 2, column = 1)
         
         self.AgeScale_0.grid(row = 5, column = 0)
@@ -94,6 +97,7 @@ class Application(tk.Frame):
         if json_filename_v2 == None:
             print ("No file selected for open file. Should be a .json")
             self.JSON_Loaded.config(text='No file selected', fg = 'red')
+            json_filename.set(json_filename_v2)
         else:
             x = (json_filename_v2.name)
             json_name_split = x.split(".")
@@ -112,6 +116,7 @@ class Application(tk.Frame):
         if excel_filename_v2 == "":
             print ("No file selected for save file. Should be a .xlsx or .xls")
             self.XLSX_Loaded.config(text="No file selected", fg='red')
+            excel_filename.set(excel_filename_v2)
         else:
             excel_name_split = (excel_filename_v2.split("."))
             if 'xlsx' in excel_name_split or 'xls' in excel_name_split:
@@ -121,7 +126,7 @@ class Application(tk.Frame):
             else:
                 print ("The save file must be a .xlsx or .xls file etension!")
                 self.XLSX_Loaded.config(text="Must be a XLSX file", fg='red')
-                
+
     def Bayesian_Workbook(self, excel_filename, json_filename, Age_Scale): 
         
             #Create Workbooks for Oxcal_Data using xlsxwriter
@@ -372,14 +377,14 @@ class Application(tk.Frame):
 
                 #reset PDF_Graphing row1 back to 1 and create seperate variable for list of dates beginning with start date
                 row1 = 1
-                if Age_Scale == 1 or Age_Scale == 2:
+                if Age_Scale.get() == 1 or Age_Scale.get() == 2:
                     start_date = start
                 else: 
                     start_date = 1949 - start
 
                 #write dates of probability density to PDF_Graphing and increment up from the start date by resolution (set in Oxcal calibration)
                 for count in rowcount:
-                    if Age_Scale == 1 or Age_Scale == 2:
+                    if Age_Scale.get() == 1 or Age_Scale.get() == 2:
                         work_sheet.write(row1, col1-1, start_date)
                         start_date += resolution
                         row1 += 1
@@ -560,7 +565,7 @@ class Application(tk.Frame):
                     modeled_start = list_posterior['start']
                     modeled_res = list_posterior['resolution']
     
-                    #Add to PDF_Graphing sheet dates and probabilities
+                    #Add to CMD_PDF_Graphing sheet dates and probabilities
                     Probabilities('modeled', modeled_prob, modeled_start, modeled_res, sheet3_row1, sheet3_col1, sheet3_row_adj, row_count2, record_count2, Age_Scale, CMD_PDF_Graphing)
                     sheet3_col1 = col1
                     sheet3_row1 = row1
@@ -573,8 +578,10 @@ class Application(tk.Frame):
             Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
             
             workbook.close()
-            self.master.quit            
-                
+            print("Opening Excel workbook")
+            command = "open -a '/Applications/Microsoft Excel.app' '" + excel_open + "'"
+            os.system(command)
+            
     def Non_Bayesian_Workbook(self, excel_filename, json_filename, Age_Scale): 
         
         #Create Workbooks for Oxcal_Data using xlsxwriter
@@ -812,14 +819,14 @@ class Application(tk.Frame):
 
             #reset PDF_Graphing row1 back to 1 and create seperate variable for list of dates beginning with start date
             row1 = 1
-            if Age_Scale == 1 or Age_Scale == 2:
+            if Age_Scale.get() == 1 or Age_Scale.get() == 2:
                 start_date = start
             else: 
                 start_date = 1949 - start
 
             #write dates of probability density to PDF_Graphing and increment up from the start date by resolution (set in Oxcal calibration)
             for count in row_count:
-                if Age_Scale == 1 or Age_Scale == 2:
+                if Age_Scale.get() == 1 or Age_Scale.get() == 2:
                     PDF_Graphing.write(row1, col1-1, start_date)
                     start_date += resolution
                     row1 += 1
@@ -898,20 +905,44 @@ class Application(tk.Frame):
         Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics)
         
         workbook.close()
-        self.master.quit
+        print("Opening Excel workbook")
+        command = "open -a '/Applications/Microsoft Excel.app' '" + excel_open + "'"
+        os.system(command)
                 
     def continue_script(self):
-        if Bayesian.get() == 1:
-            print("Opening Bayesian Output")
-            self.Bayesian_Workbook(excel_filename, json_filename, Age_Scale)
-            
-        elif Bayesian.get() == 0:
-            print("Opening Non-Bayesian Output")
-            self.Non_Bayesian_Workbook(excel_filename, json_filename, Age_Scale)
-            
-        else:
-            print("Only 1 or 0 are accepted responses!")
+        print(Age_Scale.get())
+        print(Bayesian.get())
+        json_var = json_filename.get()
+        excel_var = excel_filename.get()
         
-app = Application(master=root)
+        if json_var  == 'None' or json_var == "":
+            if excel_var == "":
+                self.files_loaded.config(text = "No files loaded", fg = 'red')
+            else: 
+                self.files_loaded.config(text = "No JSON file loaded", fg = 'red')
+        elif excel_var == "":
+            self.files_loaded.config(text = "No XLSX file loaded", fg = 'red' )
+        else:
+            self.files_loaded.config(text = "Files Loaded!", fg='green')
+            print("Loaded All")
+
+            if Bayesian.get() == 1:
+                if Age_Scale.get() != 0:
+                    print("Opening Bayesian Output")
+                    self.Bayesian_Workbook(excel_filename, json_filename, Age_Scale)
+                else:
+                    self.files_loaded.config(text = 'Choose Age Scale', fg = 'red')
+            
+            elif Bayesian.get() == 2:
+                if Age_Scale.get() != 0:
+                    print("Opening Non-Bayesian Output")
+                    self.Non_Bayesian_Workbook(excel_filename, json_filename, Age_Scale)
+                else:
+                    self.files_loaded.config(text = 'Choose Age Scale', fg = 'red')
+            else:
+                print("Only 1 or 0 are accepted responses!")
+                self.files_loaded.config(text = 'Choose Bayesian Option', fg = 'red')
+                
+app = Oxcal_output(master=root)
 app.mainloop()
 
