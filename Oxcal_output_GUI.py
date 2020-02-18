@@ -468,7 +468,7 @@ class Oxcal_output(tk.Frame):
                     record_count += 0.75
     
                 #Check if Operator is R_Date and pull out both likelihood and posterior information
-                elif list_op == "R_Date":
+                elif list_op == "R_Date" or list_op == "R_Simulate":
 
                     #Sample Name, RCYBP date, and error on RCYBP measurment
                     list_name = IndvData['name']
@@ -578,6 +578,7 @@ class Oxcal_output(tk.Frame):
             Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics) 
             
             workbook.close()
+            self.files_loaded.config(text = "Opening Excel!", fg='green')
             print("Opening Excel workbook")
             command = "open -a '/Applications/Microsoft Excel.app' '" + excel_open + "'"
             os.system(command)
@@ -858,7 +859,7 @@ class Oxcal_output(tk.Frame):
                 continue
 
             #Check if Operator is R_Date and pull out both likelihood and posterior information
-            elif list_op == "R_Date":
+            elif list_op == "R_Date" or list_op == 'R_Simulate':
 
                 #Sample Name, RCYBP date, and error on RCYBP measurment
                 list_name = IndvData['name']
@@ -904,14 +905,14 @@ class Oxcal_output(tk.Frame):
         #Add reference to calibration software used
         Date_ranges.write(sheet1_row1, sheet1_col1,((Oxcal_Data[0]['likelihood']['comment'][0]) + (Oxcal_Data[0]['likelihood']['comment'][1])), italics)
         
+        
         workbook.close()
+        self.files_loaded.config(text = "Opening Excel!", fg='green')
         print("Opening Excel workbook")
         command = "open -a '/Applications/Microsoft Excel.app' '" + excel_open + "'"
         os.system(command)
                 
     def continue_script(self):
-        print(Age_Scale.get())
-        print(Bayesian.get())
         json_var = json_filename.get()
         excel_var = excel_filename.get()
         
@@ -924,7 +925,7 @@ class Oxcal_output(tk.Frame):
             self.files_loaded.config(text = "No XLSX file loaded", fg = 'red' )
         else:
             self.files_loaded.config(text = "Files Loaded!", fg='green')
-            print("Loaded All")
+            print("All files have been loaded")
 
             if Bayesian.get() == 1:
                 if Age_Scale.get() != 0:
