@@ -68,6 +68,10 @@ class Oxcal_output(tk.Frame):
         self.files_loaded = tk.Label(self, text="")
         self.files_loaded.grid(row = 7, column = 1)
         
+        self.clear_files = tk.Button(self, text = "Clear Selections", fg='blue', bg = 'grey')
+        self.clear_files["command"] = self.clear_selections
+        self.clear_files.grid(row = 0, column = 1)
+        
         self.Bayesian_Label = tk.Label(self, text="Does the JSON file\n contain Bayesian\n modeling data?")
         self.Bayesian_1 = tk.Radiobutton(self, text = "Yes", variable = Bayesian, value = 1)
         self.Bayesian_2 = tk.Radiobutton(self, text = "No", variable = Bayesian, value = 2)
@@ -101,15 +105,13 @@ class Oxcal_output(tk.Frame):
         else:
             x = (json_filename_v2.name)
             json_name_split = x.split(".")
-    
             if 'json' in json_name_split:
                 print ("Opening read file")
                 json_filename.set(x)
-                self.JSON_Loaded.config(text="JSON File Loaded", fg = "green")
-                
+                self.JSON_Loaded.config(text="JSON File Loaded", fg = "green", bg = 'white')
             else:
                 print ("The selected file must be a .json file extension!")
-                self.JSON_Loaded.config(text="Must be a JSON File", fg='red')
+                self.JSON_Loaded.config(text="Must be a JSON File", fg='red', bg = 'white')
                 
     def xlsx_file(self):
         excel_filename_v2 = filedialog.asksaveasfilename(initialdir ="~/", title = "Save to .xlsx file", filetypes = (("Excel Workbook", "*.xlsx"),("Excel Workbook", "*.xls"),("all files","*.*")))
@@ -126,7 +128,18 @@ class Oxcal_output(tk.Frame):
             else:
                 print ("The save file must be a .xlsx or .xls file etension!")
                 self.XLSX_Loaded.config(text="Must be a XLSX file", fg='red')
-
+                
+                
+                
+    def clear_selections(self):
+        json_filename = ""
+        self.JSON_Loaded.config(text="File Cleared!", fg='steel blue')
+        self.json
+        xlsx_filename = ""
+        self.XLSX_Loaded.config(text="File Cleared!", fg='steel blue')
+        Bayesian.set(0)
+        Age_Scale.set(0)
+        
     def Bayesian_Workbook(self, excel_filename, json_filename, Age_Scale): 
         
             #Create Workbooks for Oxcal_Data using xlsxwriter
