@@ -153,6 +153,7 @@ class Oxcal_output(tk.Frame):
             with open(json_filename.get()) as json_open:
                 Oxcal_Data=json.load(json_open)
                 json_open.close()
+                print(type(Oxcal_Data))
 
             #Name varibles for various cell formats
             header = workbook.add_format({'bold': True, 'center_across': True})
@@ -253,9 +254,14 @@ class Oxcal_output(tk.Frame):
                             step_in_3c = (step_in_2a[2]/100)
     
                             if step_in_3a >= 0:
-                                AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
-                                str(int(step_in_3b)))
-                                Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                                if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
+                                    AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
+                                    str(int(step_in_3b)))
+                                    Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                                else:
+                                    AD_Date = ('AD ' + (str(int(step_in_3a))) + '- AD ' +    
+                                    str(step_in_3b))
+                                    Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
         
                             elif step_in_3a <= 0 and step_in_3b <= 0:
                                 step_in_3a = abs(step_in_3a)
@@ -284,9 +290,14 @@ class Oxcal_output(tk.Frame):
                             step_in_3c = (step_in_2a[2]/100)
 
                             if step_in_3a >= 0:
-                                CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
-                                str(int(step_in_3b)))
-                                Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
+                                if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
+                                    CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
+                                    str(int(step_in_3b)))
+                                    Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
+                                else:
+                                    CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
+                                   str(step_in_3b))
+                                    Date_ranges.write(c, sheet1_col1+col1, step_in_3a, center)
     
                             elif step_in_3a <= 0 and step_in_3b <= 0:
                                 step_in_3a = abs(step_in_3a)
@@ -695,9 +706,14 @@ class Oxcal_output(tk.Frame):
                         step_in_3c = (step_in_2a[2]/100)
     
                         if step_in_3a >= 0:
-                            AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
-                            str(int(step_in_3b)))
-                            Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                            if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
+                                AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
+                                str(int(step_in_3b)))
+                                Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                            else:
+                                AD_Date = ('AD ' + (str(int(step_in_3a))) + '- AD ' +    
+                                str(step_in_3b))
+                                Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
         
                         elif step_in_3a <= 0 and step_in_3b <= 0:
                             step_in_3a = abs(step_in_3a)
@@ -726,9 +742,14 @@ class Oxcal_output(tk.Frame):
                         step_in_3c = (step_in_2a[2]/100)
 
                         if step_in_3a >= 0:
-                            CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
-                            str(int(step_in_3b)))
-                            Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
+                            if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
+                                CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
+                                str(int(step_in_3b)))
+                                Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
+                            else:
+                                CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
+                               str(step_in_3b))
+                                Date_ranges.write(c, sheet1_col1+col1, step_in_3a, center)
     
                         elif step_in_3a <= 0 and step_in_3b <= 0:
                             step_in_3a = abs(step_in_3a)
