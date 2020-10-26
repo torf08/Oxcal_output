@@ -128,9 +128,7 @@ class Oxcal_output(tk.Frame):
             else:
                 print ("The save file must be a .xlsx or .xls file etension!")
                 self.XLSX_Loaded.config(text="Must be a XLSX file", fg='red')
-                
-                
-                
+                         
     def clear_selections(self):
         json_filename = ""
         self.JSON_Loaded.config(text="File Cleared!", fg='steel blue')
@@ -254,28 +252,28 @@ class Oxcal_output(tk.Frame):
                             step_in_3c = (step_in_2a[2]/100)
     
                             if step_in_3a >= 0:
-                                if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
-                                    AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
-                                    str(int(step_in_3b)))
+                                if isinstance(step_in_3b, float):
+                                    AD_Date = ('AD ' + str(int(round(step_in_3a,0))) + '- AD ' + str(int(round(step_in_3b,0))))
                                     Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                                
+                                elif isinstance(step_in_3b, int):
+                                    AD_Date = ('AD ' + str(int(round(step_in_3a,0))) + '- AD ' + str(step_in_3b))
+                                    Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                                
                                 else:
-                                    AD_Date = ('AD ' + (str(int(step_in_3a))) + '- AD ' +    
-                                    str(step_in_3b))
+                                    AD_Date = ('AD ' + str(int(round(step_in_3a,0))) + '- AD ' + step_in_3b)
                                     Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
         
                             elif step_in_3a <= 0 and step_in_3b <= 0:
                                 step_in_3a = abs(step_in_3a)
                                 step_in_3b = abs(step_in_3b)
         
-                                BC_Date = ('BC ' + str(int(step_in_3a)) + '- BC ' + 
-                                str(int(step_in_3b)))
+                                BC_Date = ('BC ' + str(int(round(step_in_3a,0))) + '- BC ' + str(int(round(step_in_3b,0))))
                                 Date_ranges.write(c, sheet1_col1+col1, BC_Date, center)
         
                             else:
                                 step_in_3a = abs(step_in_3a)
-        
-                                BC_AD_Date = ('BC ' + str(int(step_in_3a)) + '- AD '+ 
-                                str(int(step_in_3b)))
+                                BC_AD_Date = ('BC ' + str(int(round(step_ind_3a,0))) + '- AD '+ str(int(round(step_in_3b,0))))
                                 Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
                 
                             Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
@@ -290,28 +288,31 @@ class Oxcal_output(tk.Frame):
                             step_in_3c = (step_in_2a[2]/100)
 
                             if step_in_3a >= 0:
-                                if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
-                                    CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
-                                    str(int(step_in_3b)))
+                                if isinstance(step_in_3b, float):
+                                    CE_Date = ('CE ' + str(int(round(step_in_3a,0))) + '- CE ' + str(int(round(step_in_3b,0))))
                                     Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
+                            
+                                elif isinstance(step_in_3b, int):
+                                    CE_Date = ('CE ' + str(int(round(step_in_3a,0))) + '- CE ' + str(step_in_3b))
+                                    Date_ranges.write(c, sheet1_col1+col1, step_in_3a, center)
+                                
                                 else:
-                                    CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
-                                   str(step_in_3b))
+                                    CE_Date = ('CE ' + str(int(round(step_in_3a,0))) + '- CE ' + step_in_3b)
                                     Date_ranges.write(c, sheet1_col1+col1, step_in_3a, center)
     
                             elif step_in_3a <= 0 and step_in_3b <= 0:
                                 step_in_3a = abs(step_in_3a)
                                 step_in_3b = abs(step_in_3b)
     
-                                BCE_Date = ('BCE ' + str(int(step_in_3a)) + '- BCE ' + 
-                                str(int(step_in_3b)))
+                                BCE_Date = ('BCE ' + str(int(round(step_in_3a,0))) + '- BCE ' + 
+                                str(int(round(step_in_3b,0))))
                                 Date_ranges.write(c, sheet1_col1+col1, BCE_Date, center)
                 
                             else:
                                 step_in_3a = abs(step_in_3a)
                 
-                                BCE_CE_Date = ('BCE ' + str(int(step_ind_3a)) + '- CE '+ 
-                                str(int(step_in_3b)))
+                                BCE_CE_Date = ('BCE ' + str(int(round(step_ind_3a,0))) + '- CE '+ 
+                                str(int(round(step_in_3b,0))))
                                 Date_ranges.write(c, sheet1_col1+col1, BCE_CE_Date, center)
                 
                             Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
@@ -321,8 +322,10 @@ class Oxcal_output(tk.Frame):
                     else:
                         for sets in step_in_1a:
                             step_in_2a = sets
-                            step_in_3a = str(round(1949 - step_in_2a[0]))
-                            step_in_3b = str(round(1949 - step_in_2a[1]))
+                            print(step_in_2a[0])
+                            print(step_in_2a[1])
+                            step_in_3a = str(round(1950 - step_in_2a[0]))
+                            step_in_3b = str(round(1950 - step_in_2a[1]))
                             step_in_3c = (step_in_2a[2]/100)
             
 
@@ -431,7 +434,10 @@ class Oxcal_output(tk.Frame):
                 list_comment = list_liklihood['comment']
 
                 #very janky way to get around varibles that don't exist in the first few items in the list
-                if list_comment[0] == "OxCal v4.3.2 Bronk Ramsey (2017); r:5":
+                if list_comment[0] == "OxCal v4.4.2 Bronk Ramsey (2020); r:5": 
+                    continue
+                
+                elif list_comment[0] == "OxCal v4.3.2 Bronk Ramsey (2017); r:5": 
                     continue
 
                 list_op = IndvData['op']
@@ -706,28 +712,28 @@ class Oxcal_output(tk.Frame):
                         step_in_3c = (step_in_2a[2]/100)
     
                         if step_in_3a >= 0:
-                            if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
-                                AD_Date = ('AD ' + str(int(step_in_3a)) + '- AD ' +    
-                                str(int(step_in_3b)))
+                            if isinstance(step_in_3b, float):
+                                AD_Date = ('AD ' + str(int(round(step_in_3a,0))) + '- AD ' + str(int(round(step_in_3b,0))))
                                 Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                                
+                            elif isinstance(step_in_3b, int):
+                                AD_Date = ('AD ' + str(int(round(step_in_3a,0))) + '- AD ' + str(step_in_3b))
+                                Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
+                                
                             else:
-                                AD_Date = ('AD ' + (str(int(step_in_3a))) + '- AD ' +    
-                                str(step_in_3b))
+                                AD_Date = ('AD ' + str(int(round(step_in_3a,0))) + '- AD ' + step_in_3b)
                                 Date_ranges.write(c, sheet1_col1+col1, AD_Date, center)
         
                         elif step_in_3a <= 0 and step_in_3b <= 0:
                             step_in_3a = abs(step_in_3a)
                             step_in_3b = abs(step_in_3b)
         
-                            BC_Date = ('BC ' + str(int(step_in_3a)) + '- BC ' + 
-                            str(int(step_in_3b)))
+                            BC_Date = ('BC ' + str(int(round(step_in_3a,0))) + '- BC ' + str(int(round(step_in_3b,0))))
                             Date_ranges.write(c, sheet1_col1+col1, BC_Date, center)
         
                         else:
                             step_in_3a = abs(step_in_3a)
-        
-                            BC_AD_Date = ('BC ' + str(int(step_ind_3a)) + '- AD '+ 
-                            str(int(step_in_3b)))
+                            BC_AD_Date = ('BC ' + str(int(round(step_ind_3a,0))) + '- AD '+ str(int(round(step_in_3b,0))))
                             Date_ranges.write(c, sheet1_col1+col1, BC_AD_Date, center)
                 
                         Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
@@ -742,28 +748,31 @@ class Oxcal_output(tk.Frame):
                         step_in_3c = (step_in_2a[2]/100)
 
                         if step_in_3a >= 0:
-                            if type(step_in_3b) == 'float' or type(step_in_3b) == 'int':
-                                CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
-                                str(int(step_in_3b)))
+                            if isinstance(step_in_3b, float):
+                                CE_Date = ('CE ' + str(int(round(step_in_3a,0))) + '- CE ' + str(int(round(step_in_3b,0))))
                                 Date_ranges.write(c, sheet1_col1+col1, CE_Date, center)
+                            
+                            elif isinstance(step_in_3b, int):
+                                CE_Date = ('CE ' + str(int(round(step_in_3a,0))) + '- CE ' + str(step_in_3b))
+                                Date_ranges.write(c, sheet1_col1+col1, step_in_3a, center)
+                                
                             else:
-                                CE_Date = ('CE ' + str(int(step_in_3a)) + '- CE ' +    
-                               str(step_in_3b))
+                                CE_Date = ('CE ' + str(int(round(step_in_3a,0))) + '- CE ' + step_in_3b)
                                 Date_ranges.write(c, sheet1_col1+col1, step_in_3a, center)
     
                         elif step_in_3a <= 0 and step_in_3b <= 0:
                             step_in_3a = abs(step_in_3a)
                             step_in_3b = abs(step_in_3b)
     
-                            BCE_Date = ('BCE ' + str(int(step_in_3a)) + '- BCE ' + 
-                            str(int(step_in_3b)))
+                            BCE_Date = ('BCE ' + str(int(round(step_in_3a,0))) + '- BCE ' + 
+                            str(int(round(step_in_3b,0))))
                             Date_ranges.write(c, sheet1_col1+col1, BCE_Date, center)
                 
                         else:
                             step_in_3a = abs(step_in_3a)
                 
-                            BCE_CE_Date = ('BCE ' + str(int(step_ind_3a)) + '- CE '+ 
-                            str(int(step_in_3b)))
+                            BCE_CE_Date = ('BCE ' + str(int(round(step_ind_3a,0))) + '- CE '+ 
+                            str(int(round(step_in_3b,0))))
                             Date_ranges.write(c, sheet1_col1+col1, BCE_CE_Date, center)
                 
                         Date_ranges.write(c, sheet1_col1+col2, step_in_3c, percent)
@@ -773,8 +782,10 @@ class Oxcal_output(tk.Frame):
                 else:
                     for sets in step_in_1a:
                         step_in_2a = sets
-                        step_in_3a = str(round(1949 - step_in_2a[0]))
-                        step_in_3b = str(round(1949 - step_in_2a[1]))
+                        print(step_in_2a[0])
+                        print(step_in_2a[1])
+                        step_in_3a = str(round(1950 - step_in_2a[0]))
+                        step_in_3b = str(round(1950 - step_in_2a[1]))
                         step_in_3c = (step_in_2a[2]/100)
             
 
@@ -882,9 +893,12 @@ class Oxcal_output(tk.Frame):
 
             list_liklihood = IndvData['likelihood']
             list_comment = list_liklihood['comment']
-
+            
             #very janky way to get around varibles that don't exist in the first few items in the list
-            if list_comment[0] == "OxCal v4.3.2 Bronk Ramsey (2017); r:5":
+            if list_comment[0] == "OxCal v4.4.2 Bronk Ramsey (2020); r:5": 
+                continue
+                
+            elif list_comment[0] == "OxCal v4.3.2 Bronk Ramsey (2017); r:5": 
                 continue
                 
             list_op = IndvData['op']
@@ -916,6 +930,7 @@ class Oxcal_output(tk.Frame):
                 Medians(unmodeled_median, unmodeled_sigma, 7, 8, Age_Scale)
 
                 #Writing Unmodeled and Modeled ranges for 1 and 2 sigma to excelsheet
+                print (list_name)
                 Ranges(unmodeled_range, 1, 2, 3, 4, sheet1_row1, Age_Scale)
                 sheet1_row1 = c
                 Ranges(unmodeled_range, 2, 3, 5, 6, sheet1_row2, Age_Scale)
